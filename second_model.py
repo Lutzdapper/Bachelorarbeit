@@ -279,6 +279,9 @@ plt.show()
 # Anzeigen der Struktur des Modells
 print(cnn.summary())
 
+##### Modell speichern
+cnn.save("cnn_second_model.h5")
+
 # Errechnen der Gesamt-Ausführungsdauer
 time_end = time.time() - beginn
 print("execution_time:", time_end)
