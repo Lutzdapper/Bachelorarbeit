@@ -6,3 +6,6 @@ sondern einen Datensatz mit allen Celebrities, die mindestens mit 20 Bildern im 
 
 Die Zwischenspeicherung der Daten in Pickle-Dateien wurde vorgenommen, da diese Pickle-Dateien letztlich in Google-Colab eingelesen wurden,
 um mit der dort bereitgestellten Hardware die neuronalen Netze zu trainieren.
+
+Die entsprechenden Daten können unter folgendem Link heruntergeladen werden:
+http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html [18.12.2019]
