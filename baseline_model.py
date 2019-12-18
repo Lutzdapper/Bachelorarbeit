@@ -20,21 +20,26 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 ##### Beginn des gesamten Codes
+# speichern des Beginnzeitpunktes
 beginn = time.time()
 
-##### Beginn der execution-time
+##### Beginn der Einlesezeit
+# speichern des Beginnzeitpunktes der Einlesezeit
 start_time = time.time()
 
-##### Einlesen der Daten img_align_celeba\\
+##### Einlesen der Daten
 whiteSpaceRegex = "\\s";
 file = open("C:\\Users\\user\\Desktop\\CelebA\\list_identity_celeba_alt.txt", "r")
 file.readline()
 path = "C:\\Users\\user\\Desktop\\CelebA\\Neu_Original\\";
 
-# Gibt eine Liste "arr" zurück, die die Namen der Einträge aus "path" enthält -> also eine Liste der Namen der Bilder
+# Gibt eine Liste "allItems" zurück, die die Namen der Einträge aus "path" enthält -> also eine Liste der Namen aller Datein in dem Ordner
 allItems = os.listdir(path);
 
+# erstelle einen leeren array "arr"
 arr = []
+
+# speichere in diesen leeren array nur die Dateien aus "allItems", die mit .jpg enden, um Hindernisse beim Einlesen anderer Dateitypen zu vermeiden
 for names in allItems:
     if names.endswith(".jpg"):
         arr.append(names)
@@ -79,16 +84,19 @@ celeb_labels = np.asarray(celeb_labels, dtype=np.str)
 # Normalisieren der Bilder
 celeb_images /= 255
 
-#with open("ground_data.pickle","wb") as f:
+# speichern der eingelesenen Grunddateien, damit das Einlesen beim Wiederholen schneller ausgeführt werden kann
+# with open("ground_data.pickle","wb") as f:
 #    pickle.dump([celeb_images, celeb_labels],f)
 
+# Errechnen der Einlesedauer
 time_dateneinlesen = time.time() - start_time
 print("loading_time:", time_dateneinlesen)
 
 ####################################################################
 ##### Teilen der Daten in Train-Test-Sets
 #### Aufgrund der Menge der Daten wird sich nicht für einen 70/30 oder 80/20 Split entschieden, sondern einen 90/10 Split
-### Um sowohlim Test- als auch im Train-set alle Klassen enthalten zu haben, wird ein statified ShuffleSplit genutzt
+### Um sowohl im Test- als auch im Train-set alle Klassen enthalten zu haben, wird ein statified ShuffleSplit genutzt
+##### Beginn der Bereinigungszeit
 start_time = time.time()
 
 # speichere die Bilddaten in einen DataFrame df_celebs
@@ -115,7 +123,7 @@ median_example = unique_celebs[1].median()
 # Modus der Anzahl labels
 modal_example = unique_celebs[1].mode()
 
-# wähle aus unique_celebs die labels aus, die seltener als 7 mal in den Grunddaten vorkommen
+# wähle aus unique_celebs die labels aus, "Charlott_Cordes", "Christopher_Lee" oder "Elizabeth_McGovern sind
 few_celebs = unique_celebs[(unique_celebs[0]=="Charlott_Cordes") | (unique_celebs[0]=="Christopher_Lee") | (unique_celebs[0]=="Elizabeth_McGovern")]
 
 # speichere in einem neuen Dataframe df_final alle Reihen des DataFrames df_celebs, deren label nicht in dem DataFrame few_celebs vorkommt
@@ -125,16 +133,18 @@ df_final = df_celebs.loc[df_celebs["labels"].isin(few_celebs[0])]
 celeb_images = np.array(df_final.loc[:, df_final.columns!= "labels"])
 celeb_labels = np.array(df_final["labels"])
 
+# Errechnen der Bereinigungsdauer
 time_cleaning = time.time() - start_time
 print("cleaning_time:", time_cleaning)
 ##################
-
+# Beginn des Datensplittings
 start_time = time.time()
 shufflesplit = StratifiedShuffleSplit(n_splits=1, test_size=0.1, random_state=0)
 for train_index, test_index in shufflesplit.split(celeb_images, celeb_labels):
     train_images, test_images = celeb_images[train_index], celeb_images[test_index]
     train_labels, test_labels = celeb_labels[train_index], celeb_labels[test_index]
 
+# Errechnen der Splittingdauer
 time_splitting = time.time() - start_time
 print("splitting_time:", time_splitting)
 
@@ -153,8 +163,10 @@ test_images = test_images.reshape(test_images.shape[0], channels, height, width)
 train_labels = pd.get_dummies(train_labels)
 test_labels = pd.get_dummies(test_labels)
 
+# speichern der originalen class_labels
 class_labels = train_labels.columns.values
 
+# umandeln train- und testlabels in numpy arrays
 train_labels = train_labels.to_numpy()
 test_labels = test_labels.to_numpy()
 
@@ -162,17 +174,17 @@ test_labels = test_labels.to_numpy()
 ### Festlegen der Anzahl Klassen
 number_of_classes = train_labels.shape[1]
 
+# speichern der vorbereiteten Daten
 #with open("small_data.pickle","wb") as f:
 #    pickle.dump([number_of_classes, channels, height, width, train_images, train_labels, test_images, test_labels, class_labels],f)
 
-
-# Beginn des neuronalen Netzes
+# Setzen eines Seeds
 np.random.seed(45)
 
 # Beginn des neuronalen Netzes
 cnn = models.Sequential()
 
-# Füge einen Covolutional-Layer mit 64 Filtern und einem 5x5 Kernel hinzu. Die Aktivierungsfunktion dieses Layers ist die ReLU-Funktion.
+# Füge einen Covolutional-Layer mit 64 Filtern und einem 5x5 Kernel und zero-padding hinzu. Die Aktivierungsfunktion dieses Layers ist die ReLU-Funktion.
 cnn.add(Conv2D(filters=64,
                kernel_size=(5, 5),
                input_shape=(channels, height, width),
@@ -206,8 +218,9 @@ cnn.compile(loss="categorical_crossentropy",
             optimizer="rmsprop",
             metrics=["accuracy"])
 
-# Trainiere das Neuronale Netz mit den Trainingsbildern und ihren Labels. Die Anzahl Epochen beträgt 2 und die Batch-Size beträgt 128.
+# Trainiere das Neuronale Netz mit den Trainingsbildern und ihren Labels. Die Anzahl Epochen beträgt 40 und die Batch-Size beträgt 32.
 # die Validierung soll auf den Testdatensätzen stattfinden
+# Beginn der Trainingszeit
 start_time = time.time()
 
 cnn.fit(train_images,
@@ -217,11 +230,12 @@ cnn.fit(train_images,
         batch_size=32,
         validation_data=(test_images, test_labels))
 
+# Errechnen der Trainingsdauer
 time_fitting = time.time() - start_time
 print("fitting time:", time_fitting)
 
 
-# Accuracy
+# plotten der Accuracy
 plt.plot(cnn.history.history['acc'])
 plt.plot(cnn.history.history['val_acc'])
 plt.title('Model accuracy')
@@ -230,7 +244,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-# loss
+# plotten des loss
 plt.plot(cnn.history.history['loss'])
 plt.plot(cnn.history.history['val_loss'])
 plt.title('Model loss')
@@ -239,8 +253,10 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
+# Anzeigen der Struktur des Modells
+print(cnn.summary())
 
+# Errechnen der Gesamt-Ausführungsdauer
 time_end = time.time() - beginn
 print("execution_time:", time_end)
 
-print(cnn.summary())
