@@ -1,11 +1,6 @@
-# Bachelorarbeit
+The stored Python files are the files that were used for the final state of the bachelor thesis. The files with the extension "*allData.py" do not create a data set with only three celebrities during the data cleansing process, but a data set with all celebrities that are included in the data set with at least 20 images.
 
-Die abgelegten Python-Files sind die Dateien, die für den finalen Stand der Bachelorarbeit genutzt wurden.
-Die Dateien mit der Endung "*allData.py" erzeugen während der Datenbereinigung keinen Datensatz mit lediglich drei Celebrities,
-sondern einen Datensatz mit allen Celebrities, die mindestens mit 20 Bildern im Datensatz enthalten sind.
+The intermediate storage of the data in pickle files was carried out because these pickle files were ultimately read into Google Colab in order to train the neural networks with the hardware provided there.
 
-Die Zwischenspeicherung der Daten in Pickle-Dateien wurde vorgenommen, da diese Pickle-Dateien letztlich in Google-Colab eingelesen wurden,
-um mit der dort bereitgestellten Hardware die neuronalen Netze zu trainieren.
+The corresponding data can be downloaded under the following link: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html [18.12.2019].
 
-Die entsprechenden Daten können unter folgendem Link heruntergeladen werden:
-http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html [18.12.2019]
